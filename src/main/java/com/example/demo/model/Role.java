@@ -9,7 +9,7 @@ public class Role {
     @Id
     private Integer id;
 
-    @Column(name = "type")
+    @Column(name = "name")
     private String username;
 
     public Integer getId() {

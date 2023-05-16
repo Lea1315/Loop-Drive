@@ -1,5 +1,7 @@
 package com.example.demo.api;
 
+import com.example.demo.model.AdminAddUser;
+import com.example.demo.model.AdminUserUpdate;
 import com.example.demo.model.User;
 import com.example.demo.model.UserUpdate;
 import com.example.demo.service.UserService;
@@ -15,36 +17,32 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/add")  //admin dodaje korisnike
-    public void addUser(@RequestBody User users) {
-        userService.addUser(users);
+    @PostMapping("/users")  //admin dodaje korisnike
+    public void addUser(@RequestBody AdminAddUser newUser) {
+        userService.addUser(newUser);
     }
 
-    @GetMapping("/users")   //admin moze vidjeti sve aktivne korisnike
-    public List<User> getActiveUsers() { return userService.getActiveUsers(); }
+    @GetMapping("/users")   //admin moze vidjeti sve korisnike
+    public List<User> getUsers() { return userService.getUsers(); }
 
     @DeleteMapping("/users/{id}")   //pomocna moja ruta za upravljanje
     public void deleteUserById(@PathVariable("id") Integer id) {
         userService.deleteUser(id);
     }
 
-    @PutMapping("/edit/{id}")   //admin moze editovati korisnika (AKTIVAN I ROLU)
-    public void updateUser(@PathVariable("id") Integer id, @RequestBody User userToUpdate) {
+    @PutMapping("/users/{id}")   //admin moze editovati korisnika (AKTIVAN I ROLU)
+    public void updateUser(@PathVariable("id") Integer id, @RequestBody AdminUserUpdate userToUpdate) {
        userService.updateUser(userToUpdate, id);
     }
 
     //KORISNICI KOJI NISU ADMINI
-    @GetMapping("/login")
-    public void login(@RequestBody User user){
-        System.out.println(user.getUsername());
-    }
-    @PutMapping("/login/{id}/edit")   //korisnik edituje svoj profil (USERNAME, EMAIL, PASSWORD) ne moze rolu i aktivnost
+    @PutMapping("/profile/{id}")   //korisnik edituje svoj profil (EMAIL, PASSWORD) ne moze rolu i aktivnost
     public void updateLoginUser(@RequestBody UserUpdate newUser, @PathVariable Integer id) {
-        userService.updateLoginUser(newUser, id);
+        userService.updateLoginUser(newUser, id); //ovdje ce se id slati nakon logina u url kad bude autentifikacija
     }
 
-    @PostMapping("/login/resetPassword")
-    public void userResetPassword(@RequestBody String email) {
+    @PostMapping("/users/reset-password")
+    public void userResetPassword(@RequestParam String email) {
         userService.resetPassword(email);
     }
 

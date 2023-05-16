@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.model.AdminAddUser;
+import com.example.demo.model.AdminUserUpdate;
 import com.example.demo.model.User;
 import com.example.demo.model.UserUpdate;
 import com.example.demo.repo.UserRepository;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -34,15 +37,12 @@ public class UserService {
     }
 
     public void emailValidation(String email) {
-        if(userRepository.findUserByEmail(email) != null) throw new RuntimeException("Email already exists!");
-        if(!Pattern.matches("[a-z0-9]+@[a-z]+\\.[a-z]{2,3}", email)) throw new RuntimeException("Email is not valid!");
-    }
-    public void checkIfMailExists(String email) {
-        if(userRepository.findUserByEmail(email) == null) throw new RuntimeException("User with this email doesn't exist!");
+        if(!Pattern.matches("^[A-Za-z0-9+_.-]+@(.+)$", email)) throw new RuntimeException("Email is not valid!");
     }
 
-    public void usernameValidation(String username) {
-        if(!userRepository.findByUsername(username).isEmpty()) throw new RuntimeException("Username is taken!");
+
+    public void checkIfMailExists(String email) {
+        if(userRepository.findUserByEmail(email) == null) throw new RuntimeException("User with this email doesn't exist!");
     }
 
     public void roleValidation(Integer role) {
@@ -51,52 +51,55 @@ public class UserService {
     public void idValidation(Integer id) {
         if(userRepository.findById(id).isEmpty()) throw new RuntimeException("This user doesn't exist!");
     }
-    public void addUser(User user) {//PROVJERITI AKO MAIL VEC POSTOJI, AKO JE ISPRAVAN MAIL, AKO ROLA POSTOJI
+    public void addUser(AdminAddUser user) {//PROVJERITI AKO MAIL VEC POSTOJI, AKO JE ISPRAVAN MAIL, AKO ROLA POSTOJI
         emailValidation(user.getEmail());
-        usernameValidation(user.getUsername());
         roleValidation(user.getRole());
         String pass = generatePassword();
+        User newUser = new User(user.getUsername(), user.getRole(), user.getEmail());
         senderService.sendEmail(user.getEmail(), pass, "NEW PASSWORD");
-        user.setPassword(pass);
-        user.setActive(true);
-        userRepository.save(user);
+        newUser.setPassword(pass);
+        newUser.setActive(true);
+        userRepository.save(newUser);
     }
 
-    public List<User> getActiveUsers() {
+    public List<User> getUsers() {
         return userRepository.findAll().stream().filter(user -> user.isActive()).collect(Collectors.toList());
     }
 
     public void deleteUser(Integer id) {
+        idValidation(id);
         userRepository.deleteById(id);
     }
 
-    public void updateUser(User user, Integer id) {
+    public void updateUser(AdminUserUpdate userUpdate, Integer id) {
         idValidation(id);
-        emailValidation(user.getEmail());
-        roleValidation(user.getRole());
-        usernameValidation(user.getUsername());
-        user.setId(id);
-        userRepository.save(user);
+        Optional<User> foundUser = userRepository.findById(id);
+        if(foundUser.isPresent()) {
+            emailValidation(userUpdate.getEmail());
+            roleValidation(userUpdate.getRole());
+            foundUser.get().setEmail(userUpdate.getEmail());
+            foundUser.get().setUsername(userUpdate.getUsername());
+            foundUser.get().setPassword(userUpdate.getPassword());
+            foundUser.get().setRole(userUpdate.getRole());
+            foundUser.get().setActive(userUpdate.getActive());
+            userRepository.save(foundUser.get());
+        }
     }
 
-    public void updateLoginUser(UserUpdate newUser, Integer id) {
-        idValidation(id);
-        emailValidation(newUser.getEmail());
-        usernameValidation(newUser.getUsername());
+    public void updateLoginUser(UserUpdate userUpdate, Integer id) {
+         idValidation(id);
+         emailValidation(userUpdate.getEmail());
          Optional<User> opt = userRepository.findById(id);
          if(opt.isPresent()) {
-             opt.get().setEmail(newUser.getEmail());
-             opt.get().setUsername(newUser.getUsername());
-             opt.get().setPassword(newUser.getPassword());
+             opt.get().setEmail(userUpdate.getEmail());
+             opt.get().setPassword(userUpdate.getPassword());
              userRepository.save(opt.get());
          }
     }
 
     public void resetPassword(String email) {
-        JSONObject jsonObj = new JSONObject(email);
-        String stringEmail = jsonObj.getString("email");
-        checkIfMailExists(stringEmail);
-        User foundUser = userRepository.findUserByEmail(stringEmail);
+        checkIfMailExists(email);
+        User foundUser = userRepository.findUserByEmail(email);
         if(foundUser != null) {
             String newPassword = generatePassword();
             senderService.sendEmail(foundUser.getEmail(), newPassword, "NEW RESET PASSWORD");

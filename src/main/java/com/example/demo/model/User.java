@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,6 +33,15 @@ public class User {
 
     @Column(name = "active")
     private boolean active;
+
+    public User(String username, Integer role, String email) {
+        this.username = username;
+        this.role = role;
+        this.email = email;
+    }
+
+    public User() {}
+
     public Integer getId() {
         return id;
     }
