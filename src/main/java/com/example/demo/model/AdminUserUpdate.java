@@ -6,7 +6,7 @@ public class AdminUserUpdate{
     private String password;
     private Integer role;
     private Boolean active;
-    
+
     public String getUsername() {
         return username;
     }

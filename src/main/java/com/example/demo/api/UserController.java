@@ -1,9 +1,6 @@
 package com.example.demo.api;
 
-import com.example.demo.model.AdminAddUser;
-import com.example.demo.model.AdminUserUpdate;
-import com.example.demo.model.User;
-import com.example.demo.model.UserUpdate;
+import com.example.demo.model.*;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +20,7 @@ public class UserController {
     }
 
     @GetMapping("/users")   //admin moze vidjeti sve korisnike
-    public List<User> getUsers() { return userService.getUsers(); }
+    public List<UserData> getUsers() { return userService.getUsers(); }
 
     @DeleteMapping("/users/{id}")   //pomocna moja ruta za upravljanje
     public void deleteUserById(@PathVariable("id") Integer id) {

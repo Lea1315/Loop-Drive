@@ -1,18 +1,16 @@
 package com.example.demo.service;
 
-import com.example.demo.model.AdminAddUser;
-import com.example.demo.model.AdminUserUpdate;
-import com.example.demo.model.User;
-import com.example.demo.model.UserUpdate;
+import com.example.demo.model.*;
+import com.example.demo.repo.GroupRepository;
+import com.example.demo.repo.UserGroupRepository;
 import com.example.demo.repo.UserRepository;
 import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -20,6 +18,10 @@ import java.util.stream.Collectors;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private GroupRepository groupRepository;
+    @Autowired
+    private UserGroupRepository userGroupRepository;
     @Autowired
     private EmailSenderService senderService;
     public String generatePassword() {
@@ -62,12 +64,19 @@ public class UserService {
         userRepository.save(newUser);
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll().stream().filter(user -> user.isActive()).collect(Collectors.toList());
+    public List<UserData> getUsers() {
+        ModelMapper modelMapper = new ModelMapper();
+
+        var result = new ArrayList<UserData>();
+        var users =  userRepository.findAll();
+        List<UserData> userDataList = modelMapper.map(users, new TypeToken<List<UserData>>() {}.getType());
+
+        return userDataList;
     }
 
     public void deleteUser(Integer id) {
         idValidation(id);
+        userGroupRepository.deleteByUserId(id);
         userRepository.deleteById(id);
     }
 
