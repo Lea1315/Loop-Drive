@@ -53,7 +53,6 @@ public class GroupService {
 
     public void deleteGroup(Integer id) {
         groupRepository.deleteById(id);
-        userGroupRepository.deleteByGroupId(id);
     }
 
 
