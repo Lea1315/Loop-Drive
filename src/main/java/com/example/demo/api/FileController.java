@@ -48,4 +48,14 @@ public class FileController {
     public void deleteGroupInFile(@RequestParam Integer fileId, @RequestParam Integer groupId) {
         fileService.deleteGroupInFile(fileId, groupId);
     }
+
+    @PostMapping("files/add-user")
+    public void addUserInFile(@RequestParam Integer fileId, @RequestParam Integer userId) {
+        fileService.addUserInFile(fileId, userId);
+    }
+
+    @DeleteMapping("files/delete-user")
+    public void deleteUserInFile(@RequestParam Integer fileId, @RequestParam Integer userId) {
+        fileService.deleteUserInFile(fileId, userId);
+    }
 }

@@ -1,10 +1,5 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Lob;
-import org.hibernate.annotations.JdbcTypeCode;
-
-import java.sql.Types;
 import java.util.Date;
 
 public class FileData {

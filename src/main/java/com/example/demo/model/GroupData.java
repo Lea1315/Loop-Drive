@@ -1,9 +1,5 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToMany;
-
 import java.util.List;
 
 public class GroupData {

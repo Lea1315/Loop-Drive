@@ -2,10 +2,10 @@ package com.example.demo.service;
 
 import com.example.demo.model.File;
 import com.example.demo.model.FileGroup;
-import com.example.demo.model.Group;
-import com.example.demo.model.UserGroup;
+import com.example.demo.model.FileUser;
 import com.example.demo.repo.FileGroupRepository;
 import com.example.demo.repo.FileRepository;
+import com.example.demo.repo.FileUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +21,8 @@ public class FileService {
     private FileRepository fileRepository;
     @Autowired
     private FileGroupRepository fileGroupRepository;
+    @Autowired
+    private FileUserRepository fileUserRepository;
     public void uploadFile(String title,
                            String description,
                            Date expiry,
@@ -28,6 +30,8 @@ public class FileService {
                            List<Integer> groupsId,
                            List<Integer> usersId,
                            MultipartFile file) throws IOException {
+        //validacija podataka
+
         File newFile = new File(title, description, expiry, maxDownload);
         newFile.setData(file.getBytes());
         fileRepository.save(newFile);
@@ -36,6 +40,13 @@ public class FileService {
             for (Integer id : groupsId) {
                 var fileGroup = new FileGroup(newFile.getId(), id);
                 fileGroupRepository.save(fileGroup);
+            }
+        }
+
+        if(usersId != null) {
+            for(Integer id : usersId) {
+                var fileUser = new FileUser(newFile.getId(), id);
+                fileUserRepository.save(fileUser);
             }
         }
     }
@@ -64,6 +75,7 @@ public class FileService {
                 FileGroup fg = new FileGroup(fileId, groupId);
                 fileGroupRepository.save(fg);
             }
+            else throw new RuntimeException("This group is already allowed to download this file!");
         }
         else throw new RuntimeException("This file doesn't exist!");
     }
@@ -75,7 +87,30 @@ public class FileService {
             if(fileGroupRepository.findByFileGroup(fileId, groupId) != (null)) {
                 fileGroupRepository.deleteByFileGroupId(fileId, groupId);
             }
-            else throw new RuntimeException("This group is not allowed to download this file!");
+            else throw new RuntimeException("This group is already not allowed to download this file!");
+        }
+        else throw new RuntimeException("This file doesn't exist!");
+    }
+
+    public void addUserInFile(Integer fileId, Integer userId) {
+        Optional<File> file = fileRepository.findById(fileId);
+        if(file.isPresent()) {
+            if(fileUserRepository.findByFileUser(fileId, userId) == (null)) {
+                FileUser fu = new FileUser(fileId, userId);
+                fileUserRepository.save(fu);
+            }
+            else throw new RuntimeException("This user is already allowed to download this file!");
+        }
+        else throw new RuntimeException("This file doesn't exist!");
+    }
+
+    public void deleteUserInFile(Integer fileId, Integer userId) {
+        Optional<File> file = fileRepository.findById(fileId);
+        if(file.isPresent()) {
+            if(fileUserRepository.findByFileUser(fileId, userId) != (null)) {
+                fileUserRepository.deleteByFileUserId(fileId, userId);
+            }
+            else throw new RuntimeException("This user is already not allowed to download this file!");
         }
         else throw new RuntimeException("This file doesn't exist!");
     }
