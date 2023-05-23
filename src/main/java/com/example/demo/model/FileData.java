@@ -10,6 +10,8 @@ public class FileData {
     private Date expiry;
     private Integer maxDownload;
     private byte[] data;
+
+    private String fileType;
     public FileData() {}
 
     public Integer getId() {
@@ -58,5 +60,13 @@ public class FileData {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 }

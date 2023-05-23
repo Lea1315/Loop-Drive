@@ -1,8 +1,11 @@
 package com.example.demo.api;
 
+import com.example.demo.model.File;
+import com.example.demo.model.FileData;
 import com.example.demo.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +42,11 @@ public class FileController {
         fileService.updateFile(fileId, title, description, expiry, maxDownload);
     }
 
+    @GetMapping("/files")
+    public List<FileData> getFiles() {
+        return fileService.getFiles();
+    }
+
     @PostMapping("files/add-group")
     public void addGroupInFile(@RequestParam Integer fileId, @RequestParam Integer groupId) {
         fileService.addGroupInFile(fileId, groupId);
@@ -57,5 +65,11 @@ public class FileController {
     @DeleteMapping("files/delete-user")
     public void deleteUserInFile(@RequestParam Integer fileId, @RequestParam Integer userId) {
         fileService.deleteUserInFile(fileId, userId);
+    }
+
+    @GetMapping("/files/download")
+    public ResponseEntity<byte[]> downloadFile(@RequestParam Integer fileId) {
+        return fileService.downloadFile(fileId);
+
     }
 }

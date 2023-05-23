@@ -27,6 +27,9 @@ public class File {
     @Column(name = "uploadFile")
     private byte[] data;
 
+    @Column(name = "file_type")
+    private String fileType;
+
     public File() {}
     public File(String title, String description, Date expiry, Integer maxDownload) {
         this.title = title;
@@ -81,5 +84,13 @@ public class File {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 }
