@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -19,7 +20,7 @@ public class File {
     @Column(name = "description")
     private String description;
     @Column(name = "expiry")
-    private Date expiry;
+    private LocalDate expiry;
     @Column(name = "maxDownload")
     private Integer maxDownload;
     @Lob
@@ -31,7 +32,7 @@ public class File {
     private String fileType;
 
     public File() {}
-    public File(String title, String description, Date expiry, Integer maxDownload) {
+    public File(String title, String description, LocalDate expiry, Integer maxDownload) {
         this.title = title;
         this.description = description;
         this.expiry = expiry;
@@ -62,11 +63,11 @@ public class File {
         this.description = description;
     }
 
-    public Date getExpiry() {
+    public LocalDate getExpiry() {
         return expiry;
     }
 
-    public void setExpiry(Date expiry) {
+    public void setExpiry(LocalDate expiry) {
         this.expiry = expiry;
     }
 

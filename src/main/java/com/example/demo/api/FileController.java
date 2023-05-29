@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class FileController {
     @PostMapping(value = "/file-upload", consumes = "multipart/form-data")
     public void uploadFile(@RequestParam String title,
                            @RequestParam(required = false) String description,
-                           @RequestParam @DateTimeFormat(pattern = "dd.MM.yyyy") Date expiry,
+                           @RequestParam @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate expiry,
                            @RequestParam Integer maxDownload,
                            @RequestParam(required = false) List<Integer> groupsId,
                            @RequestParam(required = false) List<Integer> usersId,
@@ -37,7 +38,7 @@ public class FileController {
     public void updateFile( @RequestParam Integer fileId,
                             @RequestParam String title,
                             @RequestParam(required = false) String description,
-                            @RequestParam @DateTimeFormat(pattern = "dd.MM.yyyy") Date expiry,
+                            @RequestParam @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate expiry,
                             @RequestParam Integer maxDownload) {
         fileService.updateFile(fileId, title, description, expiry, maxDownload);
     }

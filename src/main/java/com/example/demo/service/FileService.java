@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,13 +31,14 @@ public class FileService {
     private FileUserRepository fileUserRepository;
     public void uploadFile(String title,
                            String description,
-                           Date expiry,
+                           LocalDate expiry,
                            Integer maxDownload,
                            List<Integer> groupsId,
                            List<Integer> usersId,
                            MultipartFile file) throws IOException {
         //validacija podataka
-
+        if(maxDownload < 1) throw new RuntimeException("Max download number incorrect!");
+        if(expiry.isBefore(LocalDate.now()));
         File newFile = new File(title, description, expiry, maxDownload);
         newFile.setData(file.getBytes());
         newFile.setFileType(file.getContentType());
@@ -61,8 +64,9 @@ public class FileService {
     }
 
 
-    public void updateFile(Integer id, String title, String description, Date expiry, Integer max) {
+    public void updateFile(Integer id, String title, String description, LocalDate expiry, Integer max) {
         Optional<File> file = fileRepository.findById(id);
+        if(max < 1) throw new RuntimeException("Max download number incorrect!");
         if(file.isPresent()) {
             file.get().setTitle(title);
             file.get().setDescription(description);
