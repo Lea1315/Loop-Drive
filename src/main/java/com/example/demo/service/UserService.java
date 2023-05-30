@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,6 +24,8 @@ public class UserService {
     private UserGroupRepository userGroupRepository;
     @Autowired
     private EmailSenderService senderService;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public String generatePassword() {
         String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -59,7 +62,7 @@ public class UserService {
         String pass = generatePassword();
         User newUser = new User(user.getUsername(), user.getRole(), user.getEmail());
         senderService.sendEmail(user.getEmail(), pass, "NEW PASSWORD");
-        newUser.setPassword(pass);
+        newUser.setPassword(bCryptPasswordEncoder.encode(pass));
         newUser.setActive(true);
         userRepository.save(newUser);
     }
