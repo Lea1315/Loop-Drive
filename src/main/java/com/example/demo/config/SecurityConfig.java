@@ -22,13 +22,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .requestMatchers("/api**")
-                .permitAll()
+                .requestMatchers("/api/users").hasAuthority("admin")
                 .and()
                 .formLogin()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .permitAll()
                 .and()
                 .authenticationProvider(authenticationProvider())
                 .httpBasic();
