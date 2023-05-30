@@ -53,9 +53,4 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.users
     OWNER to postgres;
 
-INSERT INTO public.users(
-	username, password, email, role, active)
-	VALUES ('admin5', 'MainUser!', 'lea.jesenkovic@loop.ba', 1, true);
 
-ALTER TABLE IF EXISTS public.users
-    OWNER to postgres;

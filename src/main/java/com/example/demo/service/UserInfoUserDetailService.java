@@ -31,6 +31,7 @@ public class UserInfoUserDetailService implements UserDetailsService {
         Role role = roleRepository.getReferenceById(user.getRole());
 
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role.getUsername()));
+        System.out.println(authorities);
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 }
