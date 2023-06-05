@@ -2,16 +2,19 @@ package com.example.demo.api;
 
 import com.example.demo.model.File;
 import com.example.demo.model.FileData;
+import com.example.demo.model.User;
+import com.example.demo.repo.UserRepository;
 import com.example.demo.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -19,6 +22,14 @@ import java.util.List;
 public class FileController {
     @Autowired
     private FileService fileService;
+    @Autowired
+    private UserRepository userRepository;
+
+    public User getLoggedUser(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(auth.getName());
+        return user;
+    }
     @PostMapping(value = "/file-upload", consumes = "multipart/form-data")
     public void uploadFile(@RequestParam String title,
                            @RequestParam(required = false) String description,
@@ -45,7 +56,7 @@ public class FileController {
 
     @GetMapping("/files")
     public List<FileData> getFiles() {
-        return fileService.getFiles();
+        return fileService.getFiles(getLoggedUser().getId());
     }
 
     @PostMapping("files/add-group")
@@ -70,7 +81,7 @@ public class FileController {
 
     @GetMapping("/files/download")
     public ResponseEntity<byte[]> downloadFile(@RequestParam Integer fileId) {
-        return fileService.downloadFile(fileId);
+        return fileService.downloadFile(fileId, getLoggedUser().getId());
 
     }
 }

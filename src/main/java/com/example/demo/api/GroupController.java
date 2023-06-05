@@ -33,12 +33,12 @@ public class GroupController {
         groupService.deleteGroup(groupId);
     }
 
-    @PostMapping("/groups/{id}")
+    @PostMapping("/groups/update")
     public void addUserInGroup(@RequestParam Integer groupId, @RequestParam Integer userId) {
         groupService.addUserInGroup(groupId, userId);
     }
 
-    @DeleteMapping("/groups/{id}")
+    @DeleteMapping("/groups/update")
     public void deleteUserInGroup(@RequestParam Integer groupId, @RequestParam Integer userId) {
         groupService.deleteUserInGroup(groupId, userId);
     }

@@ -1,9 +1,12 @@
 package com.example.demo.api;
 
 import com.example.demo.model.*;
+import com.example.demo.repo.UserRepository;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,14 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+
+    public  User getLoggedUser(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(auth.getName());
+        return user;
+    }
 
     @PostMapping("/users")  //admin dodaje korisnike
     public void addUser(@RequestBody AdminAddUser newUser) {
@@ -23,20 +34,20 @@ public class UserController {
     @GetMapping("/users")   //admin moze vidjeti sve korisnike
     public List<UserData> getUsers() { return userService.getUsers(); }
 
-    @DeleteMapping("/users/{id}")   //pomocna moja ruta za upravljanje
-    public void deleteUserById(@PathVariable("id") Integer id) {
-        userService.deleteUser(id);
+    @DeleteMapping("/users")   //pomocna moja ruta za upravljanje
+    public void deleteUserById(@RequestParam Integer userId) {
+        userService.deleteUser(userId);
     }
 
-    @PutMapping("/users/{id}")   //admin moze editovati korisnika (AKTIVAN I ROLU)
-    public void updateUser(@PathVariable("id") Integer id, @RequestBody AdminUserUpdate userToUpdate) {
-       userService.updateUser(userToUpdate, id);
+    @PutMapping("/users")   //admin moze editovati korisnika (AKTIVAN I ROLU)
+    public void updateUser(@RequestParam Integer userId, @RequestBody AdminUserUpdate userToUpdate) {
+       userService.updateUser(userToUpdate, userId);
     }
 
     //KORISNICI KOJI NISU ADMINI
-    @PutMapping("/profile/{id}")   //korisnik edituje svoj profil (EMAIL, PASSWORD) ne moze rolu i aktivnost
-    public void updateLoginUser(@RequestBody UserUpdate newUser, @PathVariable Integer id) {
-        userService.updateLoginUser(newUser, id); //ovdje ce se id slati nakon logina u url kad bude autentifikacija
+    @PutMapping("/profile")   //korisnik edituje svoj profil (EMAIL, PASSWORD) ne moze rolu i aktivnost
+    public void updateLoginUser(@RequestBody UserUpdate newUser) {
+        userService.updateLoginUser(newUser, getLoggedUser().getId()); //ovdje ce se id slati nakon logina u url kad bude autentifikacija
     }
 
     @PostMapping("/users/reset-password")

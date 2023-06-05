@@ -4,6 +4,7 @@ import com.example.demo.model.*;
 import com.example.demo.repo.FileGroupRepository;
 import com.example.demo.repo.FileRepository;
 import com.example.demo.repo.FileUserRepository;
+import com.example.demo.repo.UserGroupRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class FileService {
     private FileGroupRepository fileGroupRepository;
     @Autowired
     private FileUserRepository fileUserRepository;
+    @Autowired
+    private UserGroupRepository userGroupRepository;
     public void uploadFile(String title,
                            String description,
                            LocalDate expiry,
@@ -124,17 +127,35 @@ public class FileService {
         else throw new RuntimeException("This file doesn't exist!");
     }
 
-    public List<FileData> getFiles() {
+    public List<File> getFilesForLoggedInUser(Integer loggedUserId) {
+        var listOfId = fileUserRepository.findFilesByUser(loggedUserId);
+        List<File> files = new ArrayList<>();
+        listOfId.forEach(element -> {
+            files.add(fileRepository.findById(element.getFile_id()).get());
+        });
+
+        var listOfGroupsId = userGroupRepository.findGroupsByUser(loggedUserId);
+        listOfGroupsId.forEach(element -> {
+            var listOfFileId = fileGroupRepository.findFilesByGroup(element.getGroup_id());
+            listOfFileId.forEach(f -> files.add(fileRepository.findById(f.getFile_id()).get()));
+
+        });
+        return files;
+    }
+
+    public List<FileData> getFiles(Integer loggedUserId) {
         ModelMapper modelMapper = new ModelMapper();
-        var files =  fileRepository.findAll();
+        var files = getFilesForLoggedInUser(loggedUserId);
         List<FileData> fileDataList = modelMapper.map(files, new TypeToken<List<FileData>>() {}.getType());
 
         return fileDataList;
     }
 
-    public ResponseEntity<byte[]> downloadFile(Integer fileId) {
+    public ResponseEntity<byte[]> downloadFile(Integer fileId, Integer loggedUserId) {
         Optional<File> fileDB = fileRepository.findById(fileId);
-
+        if(!fileDB.isPresent()) throw new RuntimeException("This file doesn't exist!");
+        var listOfFiles = getFilesForLoggedInUser(loggedUserId);
+        if(!listOfFiles.stream().anyMatch(element -> element.getId().equals(fileId))) throw new RuntimeException("You cannot download this file!");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(fileDB.get().getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.get().getTitle() + "\"")

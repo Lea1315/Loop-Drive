@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface FileUserRepository extends JpaRepository<FileUser, Integer> {
 
@@ -17,4 +19,7 @@ public interface FileUserRepository extends JpaRepository<FileUser, Integer> {
     @Transactional
     @Query(nativeQuery = true, value = "delete from file_users where user_id = :userId and file_id = :fileId")
     void deleteByFileUserId(Integer fileId, Integer userId);
+
+    @Query(nativeQuery = true, value = "select * from file_users where user_id = :userId")
+    List<FileUser> findFilesByUser(Integer userId);
 }

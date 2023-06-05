@@ -29,9 +29,7 @@ public class UserInfoUserDetailService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
         Role role = roleRepository.findById(user.getRole()).get();
-        System.out.println("TU SAM");
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role.getUsername()));
-        System.out.println(authorities);
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 }

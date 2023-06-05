@@ -91,7 +91,7 @@ public class UserService {
             roleValidation(userUpdate.getRole());
             foundUser.get().setEmail(userUpdate.getEmail());
             foundUser.get().setUsername(userUpdate.getUsername());
-            foundUser.get().setPassword(userUpdate.getPassword());
+            foundUser.get().setPassword(bCryptPasswordEncoder.encode(userUpdate.getPassword()));
             foundUser.get().setRole(userUpdate.getRole());
             foundUser.get().setActive(userUpdate.getActive());
             userRepository.save(foundUser.get());
@@ -104,7 +104,7 @@ public class UserService {
          Optional<User> opt = userRepository.findById(id);
          if(opt.isPresent()) {
              opt.get().setEmail(userUpdate.getEmail());
-             opt.get().setPassword(userUpdate.getPassword());
+             opt.get().setPassword(bCryptPasswordEncoder.encode(userUpdate.getPassword()));
              userRepository.save(opt.get());
          }
     }
@@ -115,7 +115,7 @@ public class UserService {
         if(foundUser != null) {
             String newPassword = generatePassword();
             senderService.sendEmail(foundUser.getEmail(), newPassword, "NEW RESET PASSWORD");
-            foundUser.setPassword(newPassword);
+            foundUser.setPassword(bCryptPasswordEncoder.encode(newPassword));
             userRepository.save(foundUser);
         }
     }
