@@ -28,10 +28,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/groups/**").hasAuthority("admin")
                 .and()
                 .formLogin()
-                .permitAll()
                 .and()
-                .authenticationProvider(authenticationProvider())
-                .httpBasic();
+                .authenticationProvider(authenticationProvider());
         return http.build();
     }
 

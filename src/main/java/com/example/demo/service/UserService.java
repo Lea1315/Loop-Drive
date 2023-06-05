@@ -4,7 +4,6 @@ import com.example.demo.model.*;
 import com.example.demo.repo.GroupRepository;
 import com.example.demo.repo.UserGroupRepository;
 import com.example.demo.repo.UserRepository;
-import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,6 @@ public class UserService {
 
     public List<UserData> getUsers() {
         ModelMapper modelMapper = new ModelMapper();
-
         var result = new ArrayList<UserData>();
         var users =  userRepository.findAll();
         List<UserData> userDataList = modelMapper.map(users, new TypeToken<List<UserData>>() {}.getType());
