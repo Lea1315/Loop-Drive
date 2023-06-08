@@ -31,6 +31,12 @@ public class File {
     @Column(name = "file_type")
     private String fileType;
 
+    @Column(name = "public")
+    private boolean publicFile;
+
+    @Column(name = "download_number")
+    private Integer downloadNumber;
+
     public File() {}
     public File(String title, String description, LocalDate expiry, Integer maxDownload) {
         this.title = title;
@@ -93,5 +99,21 @@ public class File {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public boolean isPublicFile() {
+        return publicFile;
+    }
+
+    public void setPublicFile(boolean publicFile) {
+        this.publicFile = publicFile;
+    }
+
+    public Integer getDownloadNumber() {
+        return downloadNumber;
+    }
+
+    public void setDownloadNumber(Integer downloadNumber) {
+        this.downloadNumber = downloadNumber;
     }
 }

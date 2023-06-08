@@ -8,7 +8,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -23,7 +22,6 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeRequests()
                 .requestMatchers("/api/users").hasAuthority("admin")
-                .requestMatchers("/api/users/{id}").hasAuthority("admin")
                 .requestMatchers("/api/profile/**, /api/users/reset-password").hasAuthority("interni korisnik")
                 .requestMatchers("/api/groups/**").hasAuthority("admin")
                 .and()
@@ -32,7 +30,6 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider());
         return http.build();
     }
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

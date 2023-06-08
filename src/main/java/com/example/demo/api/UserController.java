@@ -4,7 +4,6 @@ import com.example.demo.model.*;
 import com.example.demo.repo.UserRepository;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -54,5 +53,8 @@ public class UserController {
     public void userResetPassword(@RequestParam String email) {
         userService.resetPassword(email);
     }
+
+    @GetMapping("/current-user")
+    public AdminAddUser getCurrentUser() { return userService.getCurrentUser();}
 
 }

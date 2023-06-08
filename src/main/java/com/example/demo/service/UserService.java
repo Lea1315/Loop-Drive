@@ -7,6 +7,8 @@ import com.example.demo.repo.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -116,5 +118,21 @@ public class UserService {
             foundUser.setPassword(bCryptPasswordEncoder.encode(newPassword));
             userRepository.save(foundUser);
         }
+    }
+
+    public User getLoggedUser(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByUsername(auth.getName());
+        if(user == null) throw new RuntimeException("You are not logged in");
+        return user;
+    }
+
+    public AdminAddUser getCurrentUser() {
+        User user = getLoggedUser();
+        AdminAddUser currentUser = new AdminAddUser();
+        currentUser.setUsername(user.getUsername());
+        currentUser.setEmail(user.getEmail());
+        currentUser.setRole(user.getRole());
+        return  currentUser;
     }
 }

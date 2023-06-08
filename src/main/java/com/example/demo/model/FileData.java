@@ -10,8 +10,10 @@ public class FileData {
     private Date expiry;
     private Integer maxDownload;
     private byte[] data;
-
     private String fileType;
+    private boolean publicFile;
+
+    private Integer downloadNumber;
     public FileData() {}
 
     public Integer getId() {
@@ -68,5 +70,21 @@ public class FileData {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public boolean isPublicFile() {
+        return publicFile;
+    }
+
+    public void setPublicFile(boolean publicFile) {
+        this.publicFile = publicFile;
+    }
+
+    public Integer getDownloadNumber() {
+        return downloadNumber;
+    }
+
+    public void setDownloadNumber(Integer downloadNumber) {
+        this.downloadNumber = downloadNumber;
     }
 }

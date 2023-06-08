@@ -25,11 +25,6 @@ public class FileController {
     @Autowired
     private UserRepository userRepository;
 
-    public User getLoggedUser(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByUsername(auth.getName());
-        return user;
-    }
     @PostMapping(value = "/file-upload", consumes = "multipart/form-data")
     public void uploadFile(@RequestParam String title,
                            @RequestParam(required = false) String description,
@@ -37,8 +32,9 @@ public class FileController {
                            @RequestParam Integer maxDownload,
                            @RequestParam(required = false) List<Integer> groupsId,
                            @RequestParam(required = false) List<Integer> usersId,
-                           @RequestParam MultipartFile file) throws IOException {
-        fileService.uploadFile(title, description, expiry, maxDownload, groupsId, usersId, file);
+                           @RequestParam MultipartFile file,
+                           @RequestParam boolean publicFile) throws IOException {
+        fileService.uploadFile(title, description, expiry, maxDownload, groupsId, usersId, file, publicFile);
     }
     @DeleteMapping("/files")
     public void deleteFile(@RequestParam Integer id) {
@@ -47,16 +43,16 @@ public class FileController {
 
     @PutMapping("/files")
     public void updateFile( @RequestParam Integer fileId,
-                            @RequestParam String title,
+                            @RequestParam(required = false) String title,
                             @RequestParam(required = false) String description,
-                            @RequestParam @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate expiry,
-                            @RequestParam Integer maxDownload) {
+                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd.MM.yyyy") LocalDate expiry,
+                            @RequestParam(required = false) Integer maxDownload) {
         fileService.updateFile(fileId, title, description, expiry, maxDownload);
     }
 
     @GetMapping("/files")
     public List<FileData> getFiles() {
-        return fileService.getFiles(getLoggedUser().getId());
+        return fileService.getFiles();
     }
 
     @PostMapping("files/add-group")
@@ -81,7 +77,7 @@ public class FileController {
 
     @GetMapping("/files/download")
     public ResponseEntity<byte[]> downloadFile(@RequestParam Integer fileId) {
-        return fileService.downloadFile(fileId, getLoggedUser().getId());
+        return fileService.downloadFile(fileId);
 
     }
 }
