@@ -37,6 +37,9 @@ public class File {
     @Column(name = "download_number")
     private Integer downloadNumber;
 
+    @Column(name = "link")
+    private String link;
+
     public File() {}
     public File(String title, String description, LocalDate expiry, Integer maxDownload) {
         this.title = title;
@@ -115,5 +118,13 @@ public class File {
 
     public void setDownloadNumber(Integer downloadNumber) {
         this.downloadNumber = downloadNumber;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 }

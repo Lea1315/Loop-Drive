@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class FileService {
@@ -33,13 +34,29 @@ public class FileService {
     private FileLogRepository fileLogRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EmailSenderService senderService;
 
+    public String generateLinkURL() {
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String num = "0123456789";
+        String combination = upper + lower + num;
+        int len = 12;
+        String url = new String();
+        Random r = new Random();
+        for(int i = 0; i < len; i++) {
+            url += combination.charAt(r.nextInt(combination.length()));
+        }
+        return url;
+    }
     public User getLoggedUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(auth.getName());
         if(user == null) throw new RuntimeException("You are not logged in");
         return user;
     }
+
     public void uploadFile(String title,
                            String description,
                            LocalDate expiry,
@@ -56,12 +73,19 @@ public class FileService {
         newFile.setData(file.getBytes());
         newFile.setFileType(file.getContentType());
         newFile.setDownloadNumber(0);
+        newFile.setLink("http://localhost:8080/api/download/" + generateLinkURL());
         fileRepository.save(newFile);
 
         if(groupsId != null) {
             for (Integer id : groupsId) {
                 var fileGroup = new FileGroup(newFile.getId(), id);
                 fileGroupRepository.save(fileGroup);
+                //NAĐI SVE LJUDE IZ GRUPA I SALJI MAIL
+                var users = userGroupRepository.findUsersByGroup(id);
+                for(UserGroup userFromGroup : users) {
+                    var userFromGroupId = userFromGroup.getUser_id();
+                    senderService.sendEmail(userRepository.findById(userFromGroupId).get().getEmail(), "File name: " + newFile.getTitle(), "New file has been shared with you");
+                }
             }
         }
 
@@ -69,6 +93,8 @@ public class FileService {
             for(Integer id : usersId) {
                 var fileUser = new FileUser(newFile.getId(), id);
                 fileUserRepository.save(fileUser);
+                //ŠALJI MAILOVE
+                senderService.sendEmail(userRepository.findById(id).get().getEmail(), "File name: " + newFile.getTitle(), "New file has been shared with you");
             }
         }
 
@@ -108,12 +134,18 @@ public class FileService {
 
     public void addGroupInFile(Integer fileId, Integer groupId) {
         FileLog fileLog = fileLogRepository.findByFileId(fileId);
+        if(fileLog == null) throw new RuntimeException("This file doesn't exist");
         if(!getLoggedUser().getId().equals(fileLog.getUploadUser())) throw new RuntimeException("You can't update this file");
         Optional<File> file = fileRepository.findById(fileId);
         if(file.isPresent()) {
             if(fileGroupRepository.findByFileGroup(fileId, groupId) == (null)) {
                 FileGroup fg = new FileGroup(fileId, groupId);
                 fileGroupRepository.save(fg);
+                var users = userGroupRepository.findUsersByGroup(groupId);
+                for(UserGroup userFromGroup : users) {
+                    var userFromGroupId = userFromGroup.getUser_id();
+                    senderService.sendEmail(userRepository.findById(userFromGroupId).get().getEmail(), "File name: " + fileRepository.findById(fileId).get().getTitle(), "New file has been shared with you");
+                }
             }
             else throw new RuntimeException("This group is already allowed to download this file!");
         }
@@ -142,6 +174,7 @@ public class FileService {
             if(fileUserRepository.findByFileUser(fileId, userId) == (null)) {
                 FileUser fu = new FileUser(fileId, userId);
                 fileUserRepository.save(fu);
+                senderService.sendEmail(userRepository.findById(userId).get().getEmail(), "File name: " + fileRepository.findById(fileId).get().getTitle(), "New file has been shared with you");
             }
             else throw new RuntimeException("This user is already allowed to download this file!");
         }
@@ -192,24 +225,42 @@ public class FileService {
             fileRepository.deleteById(fileDB.get().getId());
             throw new RuntimeException("This file reached download maximum!");
         }
-        fileDB.get().setDownloadNumber((fileDB.get().getDownloadNumber()) + 1);
+        if(fileDB.get().isPublicFile() || getLoggedUser().getRole().equals(1)) {
+            fileDB.get().setDownloadNumber((fileDB.get().getDownloadNumber()) + 1);
+            fileRepository.save(fileDB.get());
+        }
+        else {
+            var listOfFiles = getFilesForLoggedInUser();
+            if (!listOfFiles.stream().anyMatch(element -> element.getId().equals(fileId))) throw new RuntimeException("You cannot download this file!");
 
-        fileRepository.save(fileDB.get());
-        var listOfFiles = getFilesForLoggedInUser();
-        if(!listOfFiles.stream().anyMatch(element -> element.getId().equals(fileId))) throw new RuntimeException("You cannot download this file!");
-        Optional<FileLog> fl = Optional.ofNullable(fileLogRepository.findByFileId(fileDB.get().getId()));
-        FileLog fileLog = new FileLog();
-        fileLog.setFileId(fileDB.get().getId());
-        fileLog.setDownloadDate(LocalDate.now());
-        fileLog.setDownloadUser(getLoggedUser().getId());
-        fileLog.setFileId(fl.get().getFileId());
-        fileLog.setUploadUser(fl.get().getUploadUser());
-        fileLog.setUploadDate(fl.get().getUploadDate());
-        fileLogRepository.save(fileLog);
+            fileDB.get().setDownloadNumber((fileDB.get().getDownloadNumber()) + 1);
+            fileRepository.save(fileDB.get());
 
+            Optional<FileLog> fl = Optional.ofNullable(fileLogRepository.findByFileId(fileDB.get().getId()));
+            FileLog fileLog = new FileLog();
+            fileLog.setFileId(fileDB.get().getId());
+            fileLog.setDownloadDate(LocalDate.now());
+            fileLog.setDownloadUser(getLoggedUser().getId());
+            fileLog.setFileId(fl.get().getFileId());
+            fileLog.setUploadUser(fl.get().getUploadUser());
+            fileLog.setUploadDate(fl.get().getUploadDate());
+            fileLogRepository.save(fileLog);
+        }
+        System.out.println(fileDB.get().getFileType());
+        System.out.println(fileDB.get().getTitle());
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(fileDB.get().getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.get().getTitle() + "\"")
                 .body(fileDB.get().getData());
+    }
+
+    public ResponseEntity<byte[]> linkDownload(String url) {
+        File file = fileRepository.findFileByLink(url);
+        System.out.println(file.getFileType());
+        System.out.println(file.getTitle());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getTitle() + "\"")
+                .body(file.getData());
     }
 }

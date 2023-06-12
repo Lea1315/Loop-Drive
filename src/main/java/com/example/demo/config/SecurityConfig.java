@@ -21,8 +21,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .requestMatchers("/api/users").hasAuthority("admin")
-                .requestMatchers("/api/profile/**, /api/users/reset-password").hasAuthority("interni korisnik")
+                .requestMatchers("/api/users", "/api/download-file-logs").hasAuthority("admin")
+                .requestMatchers("/api/profile/**", "/api/users/reset-password").hasAuthority("interni korisnik")
                 .requestMatchers("/api/groups/**").hasAuthority("admin")
                 .and()
                 .formLogin()

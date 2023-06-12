@@ -32,4 +32,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
 
     @Query(nativeQuery = true, value = "select * from user_group where user_id = :userId")
     List<UserGroup> findGroupsByUser(Integer userId);
+
+    @Query(nativeQuery = true, value = "select * from user_group where group_id = :groupId")
+    List<UserGroup> findUsersByGroup(Integer groupId);
 }

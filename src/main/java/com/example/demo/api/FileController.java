@@ -5,6 +5,7 @@ import com.example.demo.model.FileData;
 import com.example.demo.model.User;
 import com.example.demo.repo.UserRepository;
 import com.example.demo.service.FileService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +79,10 @@ public class FileController {
     @GetMapping("/files/download")
     public ResponseEntity<byte[]> downloadFile(@RequestParam Integer fileId) {
         return fileService.downloadFile(fileId);
+    }
 
+    @GetMapping("/download/{path}")
+    public ResponseEntity<byte[]> linkDownload(@PathVariable String path, HttpServletRequest httpServletRequest) {
+        return fileService.linkDownload(httpServletRequest.getRequestURL().toString());
     }
 }
