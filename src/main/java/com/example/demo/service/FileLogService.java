@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.model.FileLog;
+import com.example.demo.model.FileLogData;
 import com.example.demo.repo.FileLogRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -25,7 +26,7 @@ public class FileLogService {
 
     public ResponseEntity getFileLogs() throws FileNotFoundException, JRException {
 
-            List<FileLog> fileLogList = fileLogRepository.findAll();
+            List<FileLogData> fileLogList = fileLogRepository.findLogs();
 
             File file = ResourceUtils.getFile("classpath:FileLog.jrxml");
 

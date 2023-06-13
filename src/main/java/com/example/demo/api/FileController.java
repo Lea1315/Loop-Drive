@@ -82,7 +82,7 @@ public class FileController {
     }
 
     @GetMapping("/download/{path}")
-    public ResponseEntity<byte[]> linkDownload(@PathVariable String path, HttpServletRequest httpServletRequest) {
-        return fileService.linkDownload(httpServletRequest.getRequestURL().toString());
+    public ResponseEntity<byte[]> linkDownload(@PathVariable String path) {
+        return fileService.linkDownload(path);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public class FileService {
     public User getLoggedUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(auth.getName());
-        if(user == null) throw new RuntimeException("You are not logged in");
+        if(user == null) return null;
         return user;
     }
 
@@ -68,12 +69,13 @@ public class FileService {
         //validacija podataka
         if(maxDownload < 1) throw new RuntimeException("Max download number incorrect!");
         if(expiry.isBefore(LocalDate.now())) throw new RuntimeException("Expiry date is older than today");
-        File newFile = new File(title, description, expiry, maxDownload);
+        String fileTitle = title + "." + file.getOriginalFilename().split("\\.")[1];
+        File newFile = new File(fileTitle, description, expiry, maxDownload);
         newFile.setPublicFile(publicFile);
         newFile.setData(file.getBytes());
         newFile.setFileType(file.getContentType());
         newFile.setDownloadNumber(0);
-        newFile.setLink("http://localhost:8080/api/download/" + generateLinkURL());
+        newFile.setLink(generateLinkURL());
         fileRepository.save(newFile);
 
         if(groupsId != null) {
@@ -98,7 +100,7 @@ public class FileService {
             }
         }
 
-        FileLog fileLog = new FileLog(newFile.getId(), LocalDate.now(), getLoggedUser().getId());
+        FileLog fileLog = new FileLog(newFile.getId(), LocalDateTime.now(), getLoggedUser().getId());
         fileLogRepository.save(fileLog);
     }
 
@@ -218,6 +220,19 @@ public class FileService {
         return fileDataList;
     }
 
+    public void upisiLogUBazu(Integer fileId) {
+        Optional<FileLog> fl = Optional.ofNullable(fileLogRepository.findByFileId(fileId));
+        User user = getLoggedUser();
+        FileLog fileLog = new FileLog();
+        fileLog.setFileId(fileId);
+        fileLog.setDownloadDate(LocalDateTime.now());
+        if(user != null) fileLog.setDownloadUser(user.getId());
+        else fileLog.setDownloadUser(null);
+        fileLog.setUploadUser(fl.get().getUploadUser());
+        fileLog.setUploadDate(fl.get().getUploadDate());
+        fileLogRepository.save(fileLog);
+    }
+
     public ResponseEntity<byte[]> downloadFile(Integer fileId) {
         Optional<File> fileDB = fileRepository.findById(fileId);
         if(!fileDB.isPresent()) throw new RuntimeException("This file doesn't exist!");
@@ -228,6 +243,8 @@ public class FileService {
         if(fileDB.get().isPublicFile() || getLoggedUser().getRole().equals(1)) {
             fileDB.get().setDownloadNumber((fileDB.get().getDownloadNumber()) + 1);
             fileRepository.save(fileDB.get());
+            //UPISATI I OVO U LOG
+            upisiLogUBazu(fileDB.get().getId());
         }
         else {
             var listOfFiles = getFilesForLoggedInUser();
@@ -236,18 +253,8 @@ public class FileService {
             fileDB.get().setDownloadNumber((fileDB.get().getDownloadNumber()) + 1);
             fileRepository.save(fileDB.get());
 
-            Optional<FileLog> fl = Optional.ofNullable(fileLogRepository.findByFileId(fileDB.get().getId()));
-            FileLog fileLog = new FileLog();
-            fileLog.setFileId(fileDB.get().getId());
-            fileLog.setDownloadDate(LocalDate.now());
-            fileLog.setDownloadUser(getLoggedUser().getId());
-            fileLog.setFileId(fl.get().getFileId());
-            fileLog.setUploadUser(fl.get().getUploadUser());
-            fileLog.setUploadDate(fl.get().getUploadDate());
-            fileLogRepository.save(fileLog);
+            upisiLogUBazu(fileDB.get().getId());
         }
-        System.out.println(fileDB.get().getFileType());
-        System.out.println(fileDB.get().getTitle());
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(fileDB.get().getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.get().getTitle() + "\"")
@@ -256,8 +263,7 @@ public class FileService {
 
     public ResponseEntity<byte[]> linkDownload(String url) {
         File file = fileRepository.findFileByLink(url);
-        System.out.println(file.getFileType());
-        System.out.println(file.getTitle());
+        upisiLogUBazu(file.getId());
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getTitle() + "\"")

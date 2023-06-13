@@ -3,6 +3,7 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "file_log")
@@ -16,9 +17,9 @@ public class FileLog {
     @Column(name = "file_id")
     private Integer fileId;
     @Column(name = "upload_date")
-    private LocalDate uploadDate;
+    private LocalDateTime uploadDate;
     @Column(name = "download_date")
-    private LocalDate downloadDate;
+    private LocalDateTime downloadDate;
     @Column(name = "upload_user")
     private Integer uploadUser;
     @Column(name = "download_user")
@@ -26,7 +27,7 @@ public class FileLog {
 
     public FileLog() {}
 
-    public FileLog(Integer fileId, LocalDate uploadDate, Integer uploadUser) {
+    public FileLog(Integer fileId, LocalDateTime uploadDate, Integer uploadUser) {
         this.fileId = fileId;
         this.uploadDate = uploadDate;
         this.uploadUser = uploadUser;
@@ -48,19 +49,19 @@ public class FileLog {
         this.fileId = fileId;
     }
 
-    public LocalDate getUploadDate() {
+    public LocalDateTime getUploadDate() {
         return uploadDate;
     }
 
-    public void setUploadDate(LocalDate uploadDate) {
+    public void setUploadDate(LocalDateTime uploadDate) {
         this.uploadDate = uploadDate;
     }
 
-    public LocalDate getDownloadDate() {
+    public LocalDateTime getDownloadDate() {
         return downloadDate;
     }
 
-    public void setDownloadDate(LocalDate downloadDate) {
+    public void setDownloadDate(LocalDateTime downloadDate) {
         this.downloadDate = downloadDate;
     }
 
