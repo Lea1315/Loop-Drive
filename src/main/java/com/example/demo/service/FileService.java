@@ -237,13 +237,14 @@ public class FileService {
         Optional<File> fileDB = fileRepository.findById(fileId);
         if(!fileDB.isPresent()) throw new RuntimeException("This file doesn't exist!");
         if(fileDB.get().getDownloadNumber().equals(fileDB.get().getMaxDownload())) {
+            //PREKO TASK SCHEDULERA URADITI
             fileRepository.deleteById(fileDB.get().getId());
             throw new RuntimeException("This file reached download maximum!");
         }
         if(fileDB.get().isPublicFile() || getLoggedUser().getRole().equals(1)) {
             fileDB.get().setDownloadNumber((fileDB.get().getDownloadNumber()) + 1);
             fileRepository.save(fileDB.get());
-            //UPISATI I OVO U LOG
+
             upisiLogUBazu(fileDB.get().getId());
         }
         else {
