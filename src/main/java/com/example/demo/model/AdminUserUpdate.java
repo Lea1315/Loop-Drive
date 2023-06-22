@@ -46,4 +46,5 @@ public class AdminUserUpdate{
     public void setActive(Boolean active) {
         this.active = active;
     }
+
 }

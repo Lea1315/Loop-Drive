@@ -7,6 +7,8 @@ import com.example.demo.repo.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -21,16 +23,27 @@ public class GroupService {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
+    public User getLoggedUser(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth == null) return null;
+        User user = userRepository.findByUsername(auth.getName());
+        return user;
+    }
+
     public void addGroup(String groupName, List<Integer> users) {
-        Group newGroup = new Group(groupName);
-        groupRepository.save(newGroup);
-        Integer groupId = groupRepository.findByName(groupName).getId();
-        if(users != null) {
-            for (Integer userId : users) {
-                var userGroup = new UserGroup(userId, groupId);
-                userGroupRepository.save(userGroup);
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
+        if(groupRepository.findByName(groupName) == null) {
+            Group newGroup = new Group(groupName);
+            groupRepository.save(newGroup);
+            Integer groupId = groupRepository.findByName(groupName).getId();
+            if (users != null) {
+                for (Integer userId : users) {
+                    var userGroup = new UserGroup(userId, groupId);
+                    userGroupRepository.save(userGroup);
+                }
             }
         }
+        else throw new RuntimeException("This group name already exists");
     }
 
     public List<GroupData> getGroup() {
@@ -52,11 +65,14 @@ public class GroupService {
     }
 
     public void deleteGroup(Integer id) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
+        if(!groupRepository.findById(id).isPresent()) throw new RuntimeException("This group doesn't exist!");
         groupRepository.deleteById(id);
     }
 
 
     public void updateGroupName(String groupName, Integer groupId) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         Optional<Group> group = groupRepository.findById(groupId);
         if(group.isPresent()) {
             group.get().setName(groupName);
@@ -66,6 +82,7 @@ public class GroupService {
     }
 
     public void addUserInGroup(Integer groupId, Integer userId) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         Optional<Group> group = groupRepository.findById(groupId);
         if(group.isPresent()) {
             if(userGroupRepository.findByGroupUser(groupId, userId) == (null)) {
@@ -77,6 +94,7 @@ public class GroupService {
     }
 
     public void deleteUserInGroup(Integer groupId, Integer userId) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         Optional<Group> group = groupRepository.findById(groupId);
         if(group.isPresent()) {
             if(userGroupRepository.findByGroupUser(groupId, userId) != (null)) {
@@ -86,5 +104,6 @@ public class GroupService {
         }
         else throw new RuntimeException("This group doesn't exist!");
     }
+
 
 }

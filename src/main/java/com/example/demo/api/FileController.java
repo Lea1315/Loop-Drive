@@ -1,16 +1,11 @@
 package com.example.demo.api;
 
-import com.example.demo.model.File;
 import com.example.demo.model.FileData;
-import com.example.demo.model.User;
 import com.example.demo.repo.UserRepository;
 import com.example.demo.service.FileService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -15,6 +15,9 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +35,12 @@ public class FileLogService {
 
             JasperReport jasperReport = JasperCompileManager
                     .compileReport(file.getAbsolutePath());
+
+
             JRBeanCollectionDataSource dataSource = new
                     JRBeanCollectionDataSource(fileLogList);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("createdBy","Lea");
-
             JasperPrint jasperPrint = JasperFillManager
                     .fillReport(jasperReport,parameters,dataSource);
 

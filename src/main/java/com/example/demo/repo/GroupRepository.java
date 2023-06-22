@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Integer> {
     Group findByName(String name);
-
-
+    @Query(nativeQuery = true, value = "select * from groups limit 1")
+    Group findAny();
 }

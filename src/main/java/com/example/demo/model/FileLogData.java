@@ -17,4 +17,5 @@ public interface FileLogData {
 
     String getDownloadUser();
 
+
 }

@@ -58,6 +58,7 @@ public class UserService {
         if(userRepository.findById(id).isEmpty()) throw new RuntimeException("This user doesn't exist!");
     }
     public void addUser(AdminAddUser user) {//PROVJERITI AKO MAIL VEC POSTOJI, AKO JE ISPRAVAN MAIL, AKO ROLA POSTOJI
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         emailValidation(user.getEmail());
         roleValidation(user.getRole());
         String pass = generatePassword();
@@ -78,12 +79,15 @@ public class UserService {
     }
 
     public void deleteUser(Integer id) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         idValidation(id);
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in");
         userGroupRepository.deleteByUserId(id);
         userRepository.deleteById(id);
     }
 
     public void updateUser(AdminUserUpdate userUpdate, Integer id) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         idValidation(id);
         Optional<User> foundUser = userRepository.findById(id);
         if(foundUser.isPresent()) {
@@ -99,6 +103,7 @@ public class UserService {
     }
 
     public void updateLoginUser(UserUpdate userUpdate, Integer id) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
          idValidation(id);
          emailValidation(userUpdate.getEmail());
          Optional<User> opt = userRepository.findById(id);
@@ -110,6 +115,7 @@ public class UserService {
     }
 
     public void resetPassword(String email) {
+        if(getLoggedUser() == null) throw new RuntimeException("You are not logged in!");
         checkIfMailExists(email);
         User foundUser = userRepository.findUserByEmail(email);
         if(foundUser != null) {
@@ -122,6 +128,7 @@ public class UserService {
 
     public User getLoggedUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth == null) return null;
         User user = userRepository.findByUsername(auth.getName());
         if(user == null) throw new RuntimeException("You are not logged in");
         return user;

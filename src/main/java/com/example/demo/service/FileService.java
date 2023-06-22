@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,7 @@ public class FileService {
     }
     public User getLoggedUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth == null) throw new RuntimeException("You are not logged in!");
         User user = userRepository.findByUsername(auth.getName());
         if(user == null) return null;
         return user;
@@ -99,6 +101,9 @@ public class FileService {
                 senderService.sendEmail(userRepository.findById(id).get().getEmail(), "File name: " + newFile.getTitle(), "New file has been shared with you");
             }
         }
+
+
+
 
         FileLog fileLog = new FileLog(newFile.getId(), LocalDateTime.now(), getLoggedUser().getId());
         fileLogRepository.save(fileLog);
@@ -225,6 +230,7 @@ public class FileService {
         User user = getLoggedUser();
         FileLog fileLog = new FileLog();
         fileLog.setFileId(fileId);
+
         fileLog.setDownloadDate(LocalDateTime.now());
         if(user != null) fileLog.setDownloadUser(user.getId());
         else fileLog.setDownloadUser(null);

@@ -136,7 +136,7 @@
 				<textElement textAlignment="Center">
 					<font fontName="Arial Nova Light" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{uploadDate}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{uploadDate}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement style="Detail" x="220" y="0" width="110" height="35" uuid="01705c88-5aa2-448e-990b-5b9abc2f5841">
@@ -169,7 +169,9 @@
 				<textElement textAlignment="Center">
 					<font fontName="Arial Nova Light" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{downloadDate}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{downloadDate}.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))]]></textFieldExpression>
+
+
 			</textField>
 			<textField isBlankWhenNull="false">
 				<reportElement style="Detail" x="108" y="0" width="112" height="35" uuid="677d0e36-70af-475e-a966-9e3f02208db8">
