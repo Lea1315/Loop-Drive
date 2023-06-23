@@ -19,6 +19,5 @@ public class EmailSenderService {
 
         mailSender.send(message);
 
-        System.out.println("New Password sent successfully!");
     }
 }
